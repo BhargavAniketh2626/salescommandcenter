@@ -1,9 +1,20 @@
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
     "sap/ui/core/Fragment",
-    "sap/viz/ui5/data/FlattenedDataset",
-    "sap/viz/ui5/controls/common/feeds/FeedItem"
-], function (Controller, Fragment, FlattenedDataset, FeedItem) {
+    "sap/ui/model/Filter",
+    "sap/ui/model/FilterOperator",
+    "sap/ui/model/Sorter",
+    "sap/m/ViewSettingsDialog",
+    "sap/m/ViewSettingsItem"
+], function (
+    Controller,
+    Fragment,
+    Filter,
+    FilterOperator,
+    Sorter,
+    ViewSettingsDialog,
+    ViewSettingsItem
+) {
     "use strict";
 
     return Controller.extend(
@@ -12,118 +23,219 @@ sap.ui.define([
 
         onInit: function () {
 
-            this._initializeRevenueChart();
-            this._initializeMarginChart();
+            this._configureCharts();
 
         },
 
         /*
         -----------------------------
-        Revenue Chart Initialization
+        Configure Chart Properties
         -----------------------------
         */
-        _initializeRevenueChart: function () {
+        _configureCharts: function () {
 
-            var oVizFrame = this.byId("salesChart");
-            if (!oVizFrame) {
-                return;
-            }
+            var oSalesChart = this.byId("salesChart");
+            var oMarginChart = this.byId("marginChart");
 
-            var oDataset = new FlattenedDataset({
-                data: {
-                    path: "/Products"
-                },
-                dimensions: [{
-                    name: "Product",
-                    value: "{ProductName}"
-                }],
-                measures: [{
-                    name: "Unit Price",
-                    value: "{UnitPrice}"
-                }]
-            });
+            if (oSalesChart) {
 
-            oVizFrame.setDataset(oDataset);
-
-            oVizFrame.addFeed(new FeedItem({
-                uid: "valueAxis",
-                type: "Measure",
-                values: ["Unit Price"]
-            }));
-
-            oVizFrame.addFeed(new FeedItem({
-                uid: "categoryAxis",
-                type: "Dimension",
-                values: ["Product"]
-            }));
-
-            oVizFrame.setVizProperties({
-                title: {
-                    visible: true,
-                    text: "Project Revenue by Product"
-                },
-                plotArea: {
-                    dataLabel: {
-                        visible: true
+                oSalesChart.setVizProperties({
+                    title: {
+                        visible: true,
+                        text: "Project Revenue by Product"
+                    },
+                    plotArea: {
+                        dataLabel: {
+                            visible: true
+                        }
                     }
-                }
-            });
+                });
+
+            }
+
+            if (oMarginChart) {
+
+                oMarginChart.setVizProperties({
+                    title: {
+                        visible: true,
+                        text: "Project Margin by Period"
+                    }
+                });
+
+            }
 
         },
 
         /*
         -----------------------------
-        Margin Chart Initialization
+        Search Orders
         -----------------------------
         */
-        _initializeMarginChart: function () {
+        onSearchOrders: function (oEvent) {
 
-            var oVizFrame = this.byId("marginChart");
-            if (!oVizFrame) {
+            var sQuery = oEvent.getSource().getValue();
+            var oTable = this.byId("ordersTable");
+            var oBinding = oTable.getBinding("items");
+
+            if (!sQuery) {
+                oBinding.filter([]);
                 return;
             }
 
-            var oDataset = new FlattenedDataset({
-                data: {
-                    path: "/Orders"
-                },
-                dimensions: [{
-                    name: "Order Date",
-                    value: "{OrderDate}"
-                }],
-                measures: [{
-                    name: "Freight",
-                    value: "{Freight}"
-                }]
+            var oFilter = new Filter({
+                filters: [
+                    new Filter("CustomerID", FilterOperator.Contains, sQuery),
+                    new Filter("OrderID", FilterOperator.EQ, sQuery)
+                ],
+                and: false
             });
 
-            oVizFrame.setDataset(oDataset);
-
-            oVizFrame.addFeed(new FeedItem({
-                uid: "valueAxis",
-                type: "Measure",
-                values: ["Freight"]
-            }));
-
-            oVizFrame.addFeed(new FeedItem({
-                uid: "categoryAxis",
-                type: "Dimension",
-                values: ["Order Date"]
-            }));
-
-            oVizFrame.setVizProperties({
-                title: {
-                    visible: true,
-                    text: "Project Margin by Period"
-                }
-            });
+            oBinding.filter(oFilter);
 
         },
 
         /*
         -----------------------------
-        Chart Click Event
-        Opens Fragment
+        Sort Orders
+        -----------------------------
+        */
+        onSortOrders: function () {
+
+            var that = this;
+
+            if (!this._sortDialog) {
+
+                this._sortDialog = new ViewSettingsDialog({
+
+                    sortItems: [
+
+                        new ViewSettingsItem({
+                            text: "Order ID",
+                            key: "OrderID"
+                        }),
+
+                        new ViewSettingsItem({
+                            text: "Customer",
+                            key: "CustomerID"
+                        }),
+
+                        new ViewSettingsItem({
+                            text: "Freight",
+                            key: "Freight"
+                        })
+
+                    ],
+
+                    confirm: function (oEvent) {
+
+                        var sKey = oEvent.getParameter("sortItem").getKey();
+                        var bDesc = oEvent.getParameter("sortDescending");
+
+                        var oSorter = new Sorter(sKey, bDesc);
+
+                        that.byId("ordersTable")
+                            .getBinding("items")
+                            .sort(oSorter);
+
+                    }
+
+                });
+
+            }
+
+            this._sortDialog.open();
+
+        },
+
+        /*
+        -----------------------------
+        Filter Orders
+        -----------------------------
+        */
+        onFilterOrders: function () {
+
+            var that = this;
+
+            if (!this._filterDialog) {
+
+                this._filterDialog = new ViewSettingsDialog({
+
+                    filterItems: [
+
+                        new ViewSettingsItem({
+                            text: "Freight > 50",
+                            key: "HighFreight"
+                        }),
+
+                        new ViewSettingsItem({
+                            text: "Freight ≤ 50",
+                            key: "LowFreight"
+                        })
+
+                    ],
+
+                    confirm: function (oEvent) {
+
+                        var aFilters = [];
+
+                        oEvent.getParameter("filterItems")
+                            .forEach(function (oItem) {
+
+                                if (oItem.getKey() === "HighFreight") {
+
+                                    aFilters.push(
+                                        new Filter(
+                                            "Freight",
+                                            FilterOperator.GT,
+                                            50
+                                        )
+                                    );
+
+                                }
+
+                                if (oItem.getKey() === "LowFreight") {
+
+                                    aFilters.push(
+                                        new Filter(
+                                            "Freight",
+                                            FilterOperator.LE,
+                                            50
+                                        )
+                                    );
+
+                                }
+
+                            });
+
+                        that.byId("ordersTable")
+                            .getBinding("items")
+                            .filter(aFilters);
+
+                    }
+
+                });
+
+            }
+
+            this._filterDialog.open();
+
+        },
+
+        /*
+        -----------------------------
+        Refresh Orders
+        -----------------------------
+        */
+        onRefreshOrders: function () {
+
+            var oModel = this.getOwnerComponent().getModel();
+            oModel.refresh(true);
+
+        },
+
+        /*
+        -----------------------------
+        Chart Click
         -----------------------------
         */
         onChartClick: function () {
@@ -144,14 +256,16 @@ sap.ui.define([
                 });
 
             } else {
+
                 this._oDialog.open();
+
             }
 
         },
 
         /*
         -----------------------------
-        Close Fragment
+        Close Dialog
         -----------------------------
         */
         onClose: function () {
@@ -164,7 +278,7 @@ sap.ui.define([
 
         /*
         -----------------------------
-        Full Screen Chart Toggle
+        Full Screen Chart
         -----------------------------
         */
         onFullScreen: function () {
@@ -172,8 +286,10 @@ sap.ui.define([
             var oChart = this.byId("salesChart");
 
             if (oChart) {
+
                 oChart.setHeight("100%");
                 oChart.setWidth("100%");
+
             }
 
         }

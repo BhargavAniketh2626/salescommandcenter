@@ -13,29 +13,27 @@ stretch="true">
 <VBox class="sapUiMediumMargin">
 
 <viz:VizFrame
-id="detailsChart"
+id="detailChart"
 vizType="stacked_bar"
 height="500px"
 uiConfig="{applicationSet:'fiori'}">
 
 <viz:dataset>
 
-<viz.data:FlattenedDataset data="{/Orders}">
+<viz.data:FlattenedDataset>
+
+<viz.data:data path="/Orders"/>
 
 <viz.data:dimensions>
-
 <viz.data:DimensionDefinition
-name="Order ID"
+name="OrderID"
 value="{OrderID}"/>
-
 </viz.data:dimensions>
 
 <viz.data:measures>
-
 <viz.data:MeasureDefinition
 name="Freight"
 value="{Freight}"/>
-
 </viz.data:measures>
 
 </viz.data:FlattenedDataset>
@@ -44,15 +42,8 @@ value="{Freight}"/>
 
 <viz:feeds>
 
-<viz.feeds:FeedItem
-uid="valueAxis"
-type="Measure"
-values="Freight"/>
-
-<viz.feeds:FeedItem
-uid="categoryAxis"
-type="Dimension"
-values="Order ID"/>
+<viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Freight"/>
+<viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="OrderID"/>
 
 </viz:feeds>
 
@@ -61,9 +52,7 @@ values="Order ID"/>
 </VBox>
 
 <endButton>
-<Button
-text="Close"
-press="onClose"/>
+<Button text="Close" press="onClose"/>
 </endButton>
 
 </Dialog>

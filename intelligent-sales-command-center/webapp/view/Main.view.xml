@@ -31,8 +31,7 @@ xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds">
 
 </HBox>
 
-
-<!-- Charts Row -->
+<!-- Charts -->
 
 <HBox justifyContent="SpaceBetween">
 
@@ -40,18 +39,20 @@ xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds">
 
 <viz:VizFrame
 id="marginChart"
+vizType="line"
 height="260px"
 width="33%"
-vizType="line"
 uiConfig="{applicationSet:'fiori'}">
 
 <viz:dataset>
 
-<viz.data:FlattenedDataset path="/Orders">
+<viz.data:FlattenedDataset>
+
+<viz.data:data path="/Orders"/>
 
 <viz.data:dimensions>
 <viz.data:DimensionDefinition
-name="Order Date"
+name="OrderDate"
 value="{OrderDate}"/>
 </viz.data:dimensions>
 
@@ -67,15 +68,8 @@ value="{Freight}"/>
 
 <viz:feeds>
 
-<viz.feeds:FeedItem
-uid="valueAxis"
-type="Measure"
-values="Freight"/>
-
-<viz.feeds:FeedItem
-uid="categoryAxis"
-type="Dimension"
-values="Order Date"/>
+<viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Freight"/>
+<viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="OrderDate"/>
 
 </viz:feeds>
 
@@ -87,14 +81,16 @@ values="Order Date"/>
 
 <viz:VizFrame
 id="salesChart"
+vizType="bar"
 height="260px"
 width="33%"
-vizType="bar"
 uiConfig="{applicationSet:'fiori'}">
 
 <viz:dataset>
 
-<viz.data:FlattenedDataset path="/Products">
+<viz.data:FlattenedDataset>
+
+<viz.data:data path="/Products"/>
 
 <viz.data:dimensions>
 <viz.data:DimensionDefinition
@@ -104,7 +100,7 @@ value="{ProductName}"/>
 
 <viz.data:measures>
 <viz.data:MeasureDefinition
-name="Unit Price"
+name="UnitPrice"
 value="{UnitPrice}"/>
 </viz.data:measures>
 
@@ -114,15 +110,8 @@ value="{UnitPrice}"/>
 
 <viz:feeds>
 
-<viz.feeds:FeedItem
-uid="valueAxis"
-type="Measure"
-values="Unit Price"/>
-
-<viz.feeds:FeedItem
-uid="categoryAxis"
-type="Dimension"
-values="Product"/>
+<viz.feeds:FeedItem uid="valueAxis" type="Measure" values="UnitPrice"/>
+<viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Product"/>
 
 </viz:feeds>
 
@@ -133,18 +122,21 @@ values="Product"/>
 <!-- Donut -->
 
 <viz:VizFrame
+id="donutChart"
+vizType="donut"
 height="260px"
 width="33%"
-vizType="donut"
 uiConfig="{applicationSet:'fiori'}">
 
 <viz:dataset>
 
-<viz.data:FlattenedDataset path="/Order_Details">
+<viz.data:FlattenedDataset>
+
+<viz.data:data path="/Order_Details"/>
 
 <viz.data:dimensions>
 <viz.data:DimensionDefinition
-name="Product"
+name="ProductID"
 value="{ProductID}"/>
 </viz.data:dimensions>
 
@@ -160,15 +152,8 @@ value="{Quantity}"/>
 
 <viz:feeds>
 
-<viz.feeds:FeedItem
-uid="size"
-type="Measure"
-values="Quantity"/>
-
-<viz.feeds:FeedItem
-uid="color"
-type="Dimension"
-values="Product"/>
+<viz.feeds:FeedItem uid="size" type="Measure" values="Quantity"/>
+<viz.feeds:FeedItem uid="color" type="Dimension" values="ProductID"/>
 
 </viz:feeds>
 
@@ -181,14 +166,17 @@ values="Product"/>
 <!-- Employee Chart -->
 
 <viz:VizFrame
-height="300px"
+id="employeeChart"
 vizType="column"
+height="300px"
 uiConfig="{applicationSet:'fiori'}"
 class="sapUiMediumMarginTop">
 
 <viz:dataset>
 
-<viz.data:FlattenedDataset path="/Employees">
+<viz.data:FlattenedDataset>
+
+<viz.data:data path="/Employees"/>
 
 <viz.data:dimensions>
 <viz.data:DimensionDefinition
@@ -198,7 +186,7 @@ value="{LastName}"/>
 
 <viz.data:measures>
 <viz.data:MeasureDefinition
-name="Employee ID"
+name="EmployeeID"
 value="{EmployeeID}"/>
 </viz.data:measures>
 
@@ -208,15 +196,8 @@ value="{EmployeeID}"/>
 
 <viz:feeds>
 
-<viz.feeds:FeedItem
-uid="valueAxis"
-type="Measure"
-values="Employee ID"/>
-
-<viz.feeds:FeedItem
-uid="categoryAxis"
-type="Dimension"
-values="Employee"/>
+<viz.feeds:FeedItem uid="valueAxis" type="Measure" values="EmployeeID"/>
+<viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Employee"/>
 
 </viz:feeds>
 
@@ -226,24 +207,92 @@ values="Employee"/>
 
 <!-- Orders Table -->
 
-<Table items="{/Orders}" class="sapUiMediumMarginTop">
+<!-- Orders Section -->
+
+<VBox class="sapUiMediumMarginTop">
+
+<!-- Toolbar -->
+
+<OverflowToolbar>
+
+<Title text="Orders"/>
+
+<ToolbarSpacer/>
+
+<SearchField
+width="300px"
+placeholder="Search Orders"/>
+
+<Button
+icon="sap-icon://sort"
+text="Sort"/>
+
+<Button
+icon="sap-icon://filter"
+text="Filter"/>
+
+<Button
+icon="sap-icon://refresh"
+text="Refresh"/>
+
+</OverflowToolbar>
+
+
+<Table
+id="ordersTable"
+items="{/Orders}"
+growing="true"
+growingScrollToLoad="true"
+growingThreshold="20">
 
 <columns>
-<Column><Text text="Order ID"/></Column>
-<Column><Text text="Customer"/></Column>
-<Column><Text text="Date"/></Column>
-<Column><Text text="Freight"/></Column>
+
+<Column
+sortProperty="OrderID"
+filterProperty="OrderID">
+
+<Text text="Order ID"/>
+
+</Column>
+
+<Column
+sortProperty="CustomerID"
+filterProperty="CustomerID">
+
+<Text text="Customer"/>
+
+</Column>
+
+<Column
+sortProperty="OrderDate"
+filterProperty="OrderDate">
+
+<Text text="Date"/>
+
+</Column>
+
+<Column
+sortProperty="Freight"
+filterProperty="Freight">
+
+<Text text="Freight"/>
+
+</Column>
+
 </columns>
+
 
 <items>
 
 <ColumnListItem>
 
 <cells>
+
 <Text text="{OrderID}"/>
 <Text text="{CustomerID}"/>
 <Text text="{OrderDate}"/>
-<Text text="{Freight}"/>
+<ObjectNumber number="{Freight}"/>
+
 </cells>
 
 </ColumnListItem>
@@ -252,6 +301,7 @@ values="Employee"/>
 
 </Table>
 
+</VBox>
 </VBox>
 
 </f:content>
