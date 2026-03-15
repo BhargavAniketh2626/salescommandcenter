@@ -1,0 +1,261 @@
+<mvc:View
+controllerName="com.sales.commandcenter.intelligentsalescommandcenter.controller.Main"
+xmlns:mvc="sap.ui.core.mvc"
+xmlns="sap.m"
+xmlns:f="sap.f"
+xmlns:viz="sap.viz.ui5.controls"
+xmlns:viz.data="sap.viz.ui5.data"
+xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds">
+
+<f:DynamicPage>
+
+<f:title>
+<f:DynamicPageTitle>
+<f:heading>
+<Title text="Intelligent Sales Command Center"/>
+</f:heading>
+</f:DynamicPageTitle>
+</f:title>
+
+<f:content>
+
+<VBox class="sapUiMediumMargin">
+
+<!-- KPI -->
+
+<HBox justifyContent="SpaceAround" class="sapUiMediumMarginBottom">
+
+<ObjectStatus text="PC 758K" state="Success"/>
+<ObjectStatus text="PM 28.4%" state="Error"/>
+<ObjectStatus text="PR 973K" state="Success"/>
+
+</HBox>
+
+
+<!-- Charts Row -->
+
+<HBox justifyContent="SpaceBetween">
+
+<!-- Margin Chart -->
+
+<viz:VizFrame
+id="marginChart"
+height="260px"
+width="33%"
+vizType="line"
+uiConfig="{applicationSet:'fiori'}">
+
+<viz:dataset>
+
+<viz.data:FlattenedDataset path="/Orders">
+
+<viz.data:dimensions>
+<viz.data:DimensionDefinition
+name="Order Date"
+value="{OrderDate}"/>
+</viz.data:dimensions>
+
+<viz.data:measures>
+<viz.data:MeasureDefinition
+name="Freight"
+value="{Freight}"/>
+</viz.data:measures>
+
+</viz.data:FlattenedDataset>
+
+</viz:dataset>
+
+<viz:feeds>
+
+<viz.feeds:FeedItem
+uid="valueAxis"
+type="Measure"
+values="Freight"/>
+
+<viz.feeds:FeedItem
+uid="categoryAxis"
+type="Dimension"
+values="Order Date"/>
+
+</viz:feeds>
+
+</viz:VizFrame>
+
+
+
+<!-- Revenue Chart -->
+
+<viz:VizFrame
+id="salesChart"
+height="260px"
+width="33%"
+vizType="bar"
+uiConfig="{applicationSet:'fiori'}">
+
+<viz:dataset>
+
+<viz.data:FlattenedDataset path="/Products">
+
+<viz.data:dimensions>
+<viz.data:DimensionDefinition
+name="Product"
+value="{ProductName}"/>
+</viz.data:dimensions>
+
+<viz.data:measures>
+<viz.data:MeasureDefinition
+name="Unit Price"
+value="{UnitPrice}"/>
+</viz.data:measures>
+
+</viz.data:FlattenedDataset>
+
+</viz:dataset>
+
+<viz:feeds>
+
+<viz.feeds:FeedItem
+uid="valueAxis"
+type="Measure"
+values="Unit Price"/>
+
+<viz.feeds:FeedItem
+uid="categoryAxis"
+type="Dimension"
+values="Product"/>
+
+</viz:feeds>
+
+</viz:VizFrame>
+
+
+
+<!-- Donut -->
+
+<viz:VizFrame
+height="260px"
+width="33%"
+vizType="donut"
+uiConfig="{applicationSet:'fiori'}">
+
+<viz:dataset>
+
+<viz.data:FlattenedDataset path="/Order_Details">
+
+<viz.data:dimensions>
+<viz.data:DimensionDefinition
+name="Product"
+value="{ProductID}"/>
+</viz.data:dimensions>
+
+<viz.data:measures>
+<viz.data:MeasureDefinition
+name="Quantity"
+value="{Quantity}"/>
+</viz.data:measures>
+
+</viz.data:FlattenedDataset>
+
+</viz:dataset>
+
+<viz:feeds>
+
+<viz.feeds:FeedItem
+uid="size"
+type="Measure"
+values="Quantity"/>
+
+<viz.feeds:FeedItem
+uid="color"
+type="Dimension"
+values="Product"/>
+
+</viz:feeds>
+
+</viz:VizFrame>
+
+</HBox>
+
+
+
+<!-- Employee Chart -->
+
+<viz:VizFrame
+height="300px"
+vizType="column"
+uiConfig="{applicationSet:'fiori'}"
+class="sapUiMediumMarginTop">
+
+<viz:dataset>
+
+<viz.data:FlattenedDataset path="/Employees">
+
+<viz.data:dimensions>
+<viz.data:DimensionDefinition
+name="Employee"
+value="{LastName}"/>
+</viz.data:dimensions>
+
+<viz.data:measures>
+<viz.data:MeasureDefinition
+name="Employee ID"
+value="{EmployeeID}"/>
+</viz.data:measures>
+
+</viz.data:FlattenedDataset>
+
+</viz:dataset>
+
+<viz:feeds>
+
+<viz.feeds:FeedItem
+uid="valueAxis"
+type="Measure"
+values="Employee ID"/>
+
+<viz.feeds:FeedItem
+uid="categoryAxis"
+type="Dimension"
+values="Employee"/>
+
+</viz:feeds>
+
+</viz:VizFrame>
+
+
+
+<!-- Orders Table -->
+
+<Table items="{/Orders}" class="sapUiMediumMarginTop">
+
+<columns>
+<Column><Text text="Order ID"/></Column>
+<Column><Text text="Customer"/></Column>
+<Column><Text text="Date"/></Column>
+<Column><Text text="Freight"/></Column>
+</columns>
+
+<items>
+
+<ColumnListItem>
+
+<cells>
+<Text text="{OrderID}"/>
+<Text text="{CustomerID}"/>
+<Text text="{OrderDate}"/>
+<Text text="{Freight}"/>
+</cells>
+
+</ColumnListItem>
+
+</items>
+
+</Table>
+
+</VBox>
+
+</f:content>
+
+</f:DynamicPage>
+
+</mvc:View>
